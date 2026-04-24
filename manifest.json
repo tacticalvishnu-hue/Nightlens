@@ -1,7 +1,7 @@
 {
   "name": "NightLens – Blue Light Filter",
   "short_name": "NightLens",
-  "description": "Protect your eyes with a warm amber blue light filter. Reduce eye strain and sleep better.",
+  "description": "Protect your eyes at night. Warm amber blue light filter with 8 presets, color temperature control and screen dimmer. Sleep better tonight.",
   "start_url": "/Nightlens/index.html",
   "scope": "/Nightlens/",
   "display": "standalone",
@@ -11,20 +11,34 @@
   "orientation": "portrait-primary",
   "lang": "en",
   "dir": "ltr",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "categories": ["health", "lifestyle", "utilities"],
-  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "shortcuts": [
     {
       "name": "Candle Mode",
       "short_name": "Candle",
-      "description": "Activate warm candle filter",
+      "description": "Warm 1800K candle filter",
       "url": "/Nightlens/index.html"
     },
     {
       "name": "Ember Mode",
       "short_name": "Ember",
-      "description": "Activate deep red ember filter",
+      "description": "Deep red 1200K ember filter",
       "url": "/Nightlens/index.html"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NightLens home screen"
     }
   ],
   "icons": [
@@ -53,4 +67,4 @@
       "purpose": "maskable"
     }
   ]
-}
+    }
