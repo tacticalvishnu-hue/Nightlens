@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d12">
+<meta name="description" content="Protect your eyes with a warm amber blue light filter">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NightLens">
+<link rel="manifest" href="manifest.json">
+<title>NightLens – Blue Light Filter</title>
+<style>
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0d0d12;
+  --surface:#16161f;
+  --surface2:#1e1e2a;
+  --border:rgba(255,255,255,0.07);
+  --text:#e8e6f0;
+  --muted:#6b697e;
+  --amber:#f5a623;
+  --amber-glow:rgba(245,166,35,0.15);
+  --radius:18px;
+  --radius-sm:12px;
+}
+html,body{
+  height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+body{padding-bottom:env(safe-area-inset-bottom);}
+
+/* ===== OVERLAY (the actual blue light filter) ===== */
+#filter-overlay{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:9998;
+  opacity:0;
+  background:rgba(255,100,0,0);
+  transition:background .4s,opacity .4s;
+}
+#dim-overlay{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:9997;
+  background:#000;
+  opacity:0;
+  transition:opacity .4s;
+}
+
+/* ===== TOP BAR ===== */
+.topbar{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:52px 20px 14px;
+  background:linear-gradient(to bottom,var(--bg) 85%,transparent);
+  position:sticky;top:0;z-index:100;
+}
+.brand-name{
+  font-size:22px;font-weight:700;letter-spacing:-.5px;
+  background:linear-gradient(135deg,#f5a623,#f7c97e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.brand-tag{
+  font-size:10px;color:var(--muted);
+  letter-spacing:.5px;margin-top:1px;
+}
+.power-ring{
+  width:54px;height:54px;border-radius:50%;
+  background:var(--surface2);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.3s;position:relative;
+  -webkit-user-select:none;user-select:none;
+}
+.power-ring.on{
+  background:var(--amber-glow);
+  border-color:var(--amber);
+  box-shadow:0 0 22px rgba(245,166,35,.35);
+}
+.power-ring svg{width:24px;height:24px;transition:.3s;}
+.power-ring.on svg{filter:drop-shadow(0 0 6px var(--amber));}
+.status-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:20px;
+  background:var(--surface2);margin-top:4px;
+}
+.status-badge.on{background:var(--amber-glow);border:1px solid rgba(245,166,35,.25);}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--muted);}
+.status-badge.on .dot{background:var(--amber);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.status-text{font-size:9px;letter-spacing:.8px;color:var(--muted);font-family:monospace;}
+.status-badge.on .status-text{color:var(--amber);}
+
+/* ===== SCROLL CONTENT ===== */
+.content{padding:0 16px 40px;}
+
+/* ===== SECTION LABEL ===== */
+.section-label{
+  font-size:9px;color:var(--muted);
+  letter-spacing:1.2px;text-transform:uppercase;
+  margin:20px 4px 10px;
+}
+
+/* ===== PREVIEW ===== */
+.preview-card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:14px;border:1px solid var(--border);margin-bottom:4px;
+}
+.preview-screen{
+  width:100%;height:100px;border-radius:10px;
+  background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.preview-tint{
+  position:absolute;inset:0;
+  transition:background .4s,opacity .4s;
+  pointer-events:none;
+}
+.preview-clock{
+  font-family:monospace;font-size:28px;
+  color:#fff;text-shadow:0 0 20px rgba(255,255,255,.3);
+  position:relative;z-index:1;text-align:center;
+}
+.preview-sub{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;}
+
+/* ===== PRESETS GRID ===== */
+.presets-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+}
+.preset{
+  background:var(--surface);border-radius:12px;
+  padding:10px 4px 8px;text-align:center;
+  cursor:pointer;border:2px solid transparent;
+  transition:.25s;-webkit-user-select:none;user-select:none;
+}
+.preset:active{transform:scale(.93);}
+.preset.active{
+  border-color:var(--amber);
+  background:var(--amber-glow);
+}
+.preset-emoji{font-size:22px;display:block;margin-bottom:4px;}
+.preset-name{font-size:9px;color:var(--muted);font-weight:500;line-height:1.2;}
+.preset.active .preset-name{color:var(--amber);}
+.preset-k{font-family:monospace;font-size:8px;color:var(--muted);opacity:.6;margin-top:1px;}
+
+/* ===== SLIDER CARDS ===== */
+.slider-card{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:14px 16px;border:1px solid var(--border);
+  margin-bottom:8px;
+}
+.slider-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.slider-label{font-size:13px;font-weight:500;}
+.slider-val{
+  font-family:monospace;font-size:11px;color:var(--amber);
+  background:var(--amber-glow);padding:2px 9px;border-radius:6px;
+  min-width:48px;text-align:center;
+}
+/* Custom range sliders */
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:5px;
+  border-radius:5px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:24px;height:24px;
+  border-radius:50%;background:var(--amber);
+  box-shadow:0 0 10px rgba(245,166,35,.5);
+  cursor:pointer;transition:.15s;
+}
+input[type=range]:active::-webkit-slider-thumb{
+  transform:scale(1.25);
+  box-shadow:0 0 20px rgba(245,166,35,.7);
+}
+#range-temp{
+  background:linear-gradient(to right,
+    #ff3300 0%,#ff6600 15%,#ff9933 30%,
+    #ffcc66 50%,#fff0cc 70%,#cce0ff 85%,#99bbff 100%);
+}
+#range-intensity{background:linear-gradient(to right,var(--surface2),var(--amber));}
+#range-dim{background:linear-gradient(to right,#111,#000);}
+
+/* ===== SCHEDULE CARD ===== */
+.schedule-card{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:14px 16px;border:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;-webkit-user-select:none;user-select:none;
+}
+.sched-info{flex:1;}
+.sched-title{font-size:13px;font-weight:500;}
+.sched-time{font-family:monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+/* Toggle switch */
+.toggle{
+  width:42px;height:24px;background:var(--surface2);
+  border-radius:12px;position:relative;
+  transition:.3s;flex-shrink:0;
+}
+.toggle.on{background:var(--amber);}
+.toggle::after{
+  content:'';position:absolute;
+  top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:#fff;
+  transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.toggle.on::after{left:21px;}
+
+/* ===== TIPS CARD ===== */
+.tips-card{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:14px 16px;border:1px solid var(--border);margin-top:8px;
+}
+.tip-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+.tip-row:last-child{margin-bottom:0;}
+.tip-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.tip-text{font-size:12px;color:var(--muted);line-height:1.4;}
+.tip-text strong{color:var(--text);}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;font-size:10px;
+  color:var(--muted);margin-top:24px;opacity:.5;
+}
+</style>
+</head>
+<body>
+
+<!-- The actual screen filter overlays -->
+<div id="filter-overlay"></div>
+<div id="dim-overlay"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="brand-name">NightLens</div>
+    <div class="status-badge" id="status-badge">
+      <span class="dot"></span>
+      <span class="status-text" id="status-text">FILTER OFF</span>
+    </div>
+  </div>
+  <div class="power-ring" id="power-btn" onclick="toggleFilter()">
+    <svg viewBox="0 0 24 24" fill="none" id="power-svg"
+      stroke="#6b697e" stroke-width="2.2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/>
+      <line x1="12" y1="2" x2="12" y2="12"/>
+    </svg>
+  </div>
+</div>
+
+<!-- SCROLLABLE CONTENT -->
+<div class="content">
+
+  <!-- SCREEN PREVIEW -->
+  <div class="preview-card">
+    <div class="section-label" style="margin-top:0">Screen Preview</div>
+    <div class="preview-screen">
+      <div class="preview-tint" id="preview-tint"></div>
+      <div style="position:relative;z-index:1;text-align:center;">
+        <div class="preview-clock" id="preview-clock">--:--</div>
+        <div class="preview-sub" id="preview-sub">Live preview</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRESETS -->
+  <div class="section-label">Light Mode Presets</div>
+  <div class="presets-grid" id="presets-grid">
+    <!-- Generated by JS -->
+  </div>
+
+  <!-- COLOR TEMPERATURE -->
+  <div class="section-label">Fine Tuning</div>
+
+  <div class="slider-card">
+    <div class="slider-header">
+      <span class="slider-label">🌡️ Color Temperature</span>
+      <span class="slider-val" id="val-temp">1800K</span>
+    </div>
+    <input type="range" id="range-temp" min="1000" max="9300" value="1800" step="100">
+  </div>
+
+  <div class="slider-card">
+    <div class="slider-header">
+      <span class="slider-label">🔆 Filter Intensity</span>
+      <span class="slider-val" id="val-intensity">70%</span>
+    </div>
+    <input type="range" id="range-intensity" min="0" max="100" value="70" step="1">
+  </div>
+
+  <div class="slider-card">
+    <div class="slider-header">
+      <span class="slider-label">🌑 Screen Dimmer</span>
+      <span class="slider-val" id="val-dim">0%</span>
+    </div>
+    <input type="range" id="range-dim" min="0" max="80" value="0" step="1">
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="section-label">Auto Schedule</div>
+  <div class="schedule-card" onclick="toggleSchedule()">
+    <span style="font-size:22px;">🌙</span>
+    <div class="sched-info">
+      <div class="sched-title">Sunset to Sunrise</div>
+      <div class="sched-time">20:00 → 06:30 every day</div>
+    </div>
+    <div class="toggle" id="sched-toggle"></div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section-label">Why It Matters</div>
+  <div class="tips-card">
+    <div class="tip-row">
+      <span class="tip-icon">😴</span>
+      <div class="tip-text"><strong>Better sleep</strong> — Blue light delays melatonin by up to 90 mins. Amber filter fixes this.</div>
+    </div>
+    <div class="tip-row">
+      <span class="tip-icon">👁️</span>
+      <div class="tip-text"><strong>Less eye strain</strong> — Warm light is gentler on your eyes during night browsing.</div>
+    </div>
+    <div class="tip-row">
+      <span class="tip-icon">🔋</span>
+      <div class="tip-text"><strong>Saves battery</strong> — Dimmer + warm tones use less power than full brightness.</div>
+    </div>
+  </div>
+
+  <div class="footer">NightLens v1.0 · Protect your eyes every night 🌙</div>
+</div>
+
+<script>
+// =============================================
+// DATA — All 8 presets
+// =============================================
+const PRESETS = [
+  { icon:'🔥', name:'Ember',    k:1200, r:255, g:40,  b:0,  intensity:85 },
+  { icon:'🕯️', name:'Candle',  k:1800, r:255, g:80,  b:0,  intensity:70 },
+  { icon:'💡', name:'Warm',     k:2700, r:255, g:120, b:20, intensity:55 },
+  { icon:'🌅', name:'Sunset',   k:3200, r:255, g:155, b:60, intensity:42 },
+  { icon:'🌙', name:'Moon',     k:4000, r:255, g:190, b:100,intensity:32 },
+  { icon:'🌤️', name:'Day',     k:5000, r:255, g:220, b:150,intensity:20 },
+  { icon:'❄️', name:'Cool',    k:6500, r:200, g:210, b:255,intensity:12 },
+  { icon:'🔵', name:'Screen',  k:9300, r:150, g:180, b:255,intensity:8  },
+];
+
+// =============================================
+// STATE
+// =============================================
+let state = {
+  on: false,
+  temp: 1800,
+  intensity: 70,
+  dim: 0,
+  scheduleOn: false,
+  activePreset: 1, // Candle default
+};
+
+// Load from localStorage (remembers settings)
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('nightlens_state') || '{}');
+    Object.assign(state, saved);
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('nightlens_state', JSON.stringify(state)); } catch(e) {}
+}
+
+// =============================================
+// COLOR MATH — temperature → RGB
+// =============================================
+function tempToRGB(k) {
+  if (k < 2000) return [255, Math.round((k-1000)/1000*60), 0];
+  if (k < 3000) return [255, Math.round(60+(k-2000)/1000*80), 0];
+  if (k < 4000) return [255, Math.round(140+(k-3000)/1000*60), Math.round((k-3000)/1000*40)];
+  if (k < 5500) return [255, Math.round(200+(k-4000)/1500*30), Math.round(40+(k-4000)/1500*80)];
+  if (k < 6500) return [Math.round(255-(k-5500)/1000*30), 230, Math.round(120+(k-5500)/1000*80)];
+  return [Math.round(225-(k-6500)/2800*60), Math.round(230-(k-6500)/2800*40), 255];
+}
+
+// =============================================
+// APPLY FILTER
+// =============================================
+function applyFilter() {
+  const overlay  = document.getElementById('filter-overlay');
+  const dimEl    = document.getElementById('dim-overlay');
+  const tint     = document.getElementById('preview-tint');
+
+  if (!state.on) {
+    overlay.style.opacity = 0;
+    dimEl.style.opacity   = 0;
+    tint.style.background = 'transparent';
+    return;
+  }
+
+  const [r,g,b] = tempToRGB(state.temp);
+  const alpha   = (state.intensity / 100) * 0.72;
+  const color   = `rgba(${r},${g},${b},${alpha})`;
+
+  overlay.style.background = color;
+  overlay.style.opacity    = 1;
+  tint.style.background    = color;
+
+  dimEl.style.opacity = (state.dim / 100) * 0.85;
+}
+
+// =============================================
+// TOGGLE POWER
+// =============================================
+function toggleFilter() {
+  state.on = !state.on;
+  saveState();
+  updatePowerUI();
+  applyFilter();
+
+  // Haptic feedback on supported phones
+  if (navigator.vibrate) navigator.vibrate(state.on ? [30] : [15,10,15]);
+}
+
+function updatePowerUI() {
+  const btn    = document.getElementById('power-btn');
+  const svg    = document.getElementById('power-svg');
+  const badge  = document.getElementById('status-badge');
+  const text   = document.getElementById('status-text');
+
+  if (state.on) {
+    btn.classList.add('on');
+    badge.classList.add('on');
+    svg.setAttribute('stroke','#f5a623');
+    text.textContent = 'FILTER ACTIVE';
+  } else {
+    btn.classList.remove('on');
+    badge.classList.remove('on');
+    svg.setAttribute('stroke','#6b697e');
+    text.textContent = 'FILTER OFF';
+  }
+}
+
+// =============================================
+// BUILD PRESET CARDS
+// =============================================
+function buildPresets() {
+  const grid = document.getElementById('presets-grid');
+  grid.innerHTML = PRESETS.map((p,i) => `
+    <div class="preset ${i===state.activePreset?'active':''}"
+         onclick="selectPreset(${i})">
+      <span class="preset-emoji">${p.icon}</span>
+      <div class="preset-name">${p.name}</div>
+      <div class="preset-k">${p.k}K</div>
+    </div>
+  `).join('');
+}
+
+function selectPreset(i) {
+  const p = PRESETS[i];
+  state.activePreset = i;
+  state.temp      = p.k;
+  state.intensity = p.intensity;
+
+  // Update sliders
+  document.getElementById('range-temp').value      = p.k;
+  document.getElementById('range-intensity').value = p.intensity;
+  document.getElementById('val-temp').textContent      = p.k + 'K';
+  document.getElementById('val-intensity').textContent = p.intensity + '%';
+
+  buildPresets();
+
+  if (!state.on) { state.on = true; updatePowerUI(); }
+  applyFilter();
+  saveState();
+
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+// =============================================
+// SLIDERS
+// =============================================
+document.getElementById('range-temp').oninput = function() {
+  state.temp = parseInt(this.value);
+  document.getElementById('val-temp').textContent = this.value + 'K';
+  if (!state.on) { state.on = true; updatePowerUI(); }
+  applyFilter(); saveState();
+};
+
+document.getElementById('range-intensity').oninput = function() {
+  state.intensity = parseInt(this.value);
+  document.getElementById('val-intensity').textContent = this.value + '%';
+  applyFilter(); saveState();
+};
+
+document.getElementById('range-dim').oninput = function() {
+  state.dim = parseInt(this.value);
+  document.getElementById('val-dim').textContent = this.value + '%';
+  applyFilter(); saveState();
+};
+
+// =============================================
+// SCHEDULE
+// =============================================
+function toggleSchedule() {
+  state.scheduleOn = !state.scheduleOn;
+  document.getElementById('sched-toggle').classList.toggle('on', state.scheduleOn);
+  saveState();
+  if (state.scheduleOn) checkSchedule();
+}
+
+function checkSchedule() {
+  if (!state.scheduleOn) return;
+  const now  = new Date();
+  const hour = now.getHours();
+  const min  = now.getMinutes();
+  const mins = hour * 60 + min;
+  const onAt  = 20 * 60;  // 20:00
+  const offAt = 6 * 60 + 30; // 06:30
+
+  const shouldBeOn = mins >= onAt || mins < offAt;
+  if (shouldBeOn !== state.on) {
+    state.on = shouldBeOn;
+    updatePowerUI();
+    applyFilter();
+    saveState();
+  }
+}
+
+// =============================================
+// LIVE CLOCK
+// =============================================
+function updateClock() {
+  const now = new Date();
+  const h   = String(now.getHours()).padStart(2,'0');
+  const m   = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('preview-clock').textContent = h + ':' + m;
+  document.getElementById('preview-sub').textContent =
+    now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+// =============================================
+// INIT
+// =============================================
+function init() {
+  loadState();
+
+  // Restore slider positions
+  document.getElementById('range-temp').value      = state.temp;
+  document.getElementById('range-intensity').value = state.intensity;
+  document.getElementById('range-dim').value       = state.dim;
+  document.getElementById('val-temp').textContent      = state.temp + 'K';
+  document.getElementById('val-intensity').textContent = state.intensity + '%';
+  document.getElementById('val-dim').textContent       = state.dim + '%';
+
+  document.getElementById('sched-toggle').classList.toggle('on', state.scheduleOn);
+
+  buildPresets();
+  updatePowerUI();
+  applyFilter();
+  updateClock();
+
+  setInterval(updateClock, 1000);
+  setInterval(checkSchedule, 60000);
+}
+
+// Register service worker for offline use
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+init();
+</script>
+</body>
+  </html>
+        
