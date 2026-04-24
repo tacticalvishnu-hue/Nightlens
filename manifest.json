@@ -1,25 +1,56 @@
 {
   "name": "NightLens – Blue Light Filter",
   "short_name": "NightLens",
-  "description": "Protect your eyes with a warm amber screen filter",
-  "start_url": "/Nightlens/",
+  "description": "Protect your eyes with a warm amber blue light filter. Reduce eye strain and sleep better.",
+  "start_url": "/Nightlens/index.html",
   "scope": "/Nightlens/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0d0d12",
   "theme_color": "#f5a623",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["health", "lifestyle", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Candle Mode",
+      "short_name": "Candle",
+      "description": "Activate warm candle filter",
+      "url": "/Nightlens/index.html"
+    },
+    {
+      "name": "Ember Mode",
+      "short_name": "Ember",
+      "description": "Activate deep red ember filter",
+      "url": "/Nightlens/index.html"
+    }
+  ],
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
