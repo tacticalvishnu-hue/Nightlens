@@ -1,15 +1,16 @@
 {
-  "name": "NightLens – Blue Light Filter",
-  "short_name": "NightLens",
-  "description": "Protect your eyes at night. Warm amber blue light filter with 8 presets, color temperature control and screen dimmer. Sleep better tonight.",
+  "id": "/Nightlens/",
+  "name": "Blue Light Filter - Night Mode",
+  "short_name": "Night Filter",
+  "description": "Protect your eyes with a warm amber blue light filter. Reduce eye strain, sleep better and block harmful blue light wavelengths with 8 scientifically tuned presets.",
   "start_url": "/Nightlens/index.html",
   "scope": "/Nightlens/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#0d0d12",
+  "background_color": "#0a0a0f",
   "theme_color": "#f5a623",
   "orientation": "portrait-primary",
-  "lang": "en",
+  "lang": "en-US",
   "dir": "ltr",
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "categories": ["health", "lifestyle", "utilities"],
@@ -18,17 +19,26 @@
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "shortcuts": [
     {
-      "name": "Candle Mode",
+      "name": "Candle Mode (1800K)",
       "short_name": "Candle",
-      "description": "Warm 1800K candle filter",
+      "description": "Activate warm 1800K candle filter",
       "url": "/Nightlens/index.html"
     },
     {
-      "name": "Ember Mode",
+      "name": "Ember Mode (1200K)",
       "short_name": "Ember",
-      "description": "Deep red 1200K ember filter",
+      "description": "Activate deep red 1200K filter",
+      "url": "/Nightlens/index.html"
+    },
+    {
+      "name": "Moon Mode (4000K)",
+      "short_name": "Moon",
+      "description": "Activate moonlight filter",
       "url": "/Nightlens/index.html"
     }
   ],
@@ -38,7 +48,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "NightLens home screen"
+      "label": "Blue Light Filter home screen with preset modes"
     }
   ],
   "icons": [
@@ -67,4 +77,4 @@
       "purpose": "maskable"
     }
   ]
-    }
+}
