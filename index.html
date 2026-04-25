@@ -3,317 +3,507 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a0f">
-<meta name="description" content="Blue Light Filter - Night Mode. Protect your eyes. Reduce eye strain and sleep better.">
+<meta name="theme-color" id="theme-meta" content="#0a0a0f">
+<meta name="description" content="Blue Light Filter - Night Mode. Protect your eyes, sleep better.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Night Filter">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Blue Light Filter - Night Mode</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#0a0a0f;--surface:#13131a;--surface2:#1a1a24;--surface3:#20202e;
-  --border:rgba(255,255,255,0.06);--text:#eeedf5;--muted:#6b697e;
-  --amber:#f5a623;--amber2:#f7c97e;
-  --amber-glow:rgba(245,166,35,0.12);--amber-glow2:rgba(245,166,35,0.25);
-  --radius:20px;--radius-sm:14px;--radius-xs:10px;
+/* ============================================================
+   DESIGN SYSTEM
+   ============================================================ */
+:root {
+  --bg:        #0a0a0f;
+  --surface:   #111118;
+  --surface2:  #18181f;
+  --surface3:  #1e1e28;
+  --border:    rgba(255,255,255,0.055);
+  --text:      #f0eef8;
+  --text2:     #a8a6b8;
+  --muted:     #5a5870;
+  --amber:     #f5a623;
+  --amber-lt:  #f7c97e;
+  --amber-dk:  #c47d0a;
+  --glow:      rgba(245,166,35,0.13);
+  --glow2:     rgba(245,166,35,0.26);
+  --green:     #22c97a;
+  --red:       #f05050;
+  --r:         20px;
+  --r-sm:      14px;
+  --r-xs:      10px;
+  --trans:     0.28s cubic-bezier(0.4,0,0.2,1);
 }
-html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
-#filter-overlay{position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:0;background:rgba(255,80,0,0);transition:background .5s,opacity .5s;}
-#dim-overlay{position:fixed;inset:0;pointer-events:none;z-index:9997;background:#000;opacity:0;transition:opacity .5s;}
-.app{padding-bottom:40px;}
-.topbar{padding:48px 20px 16px;background:linear-gradient(180deg,var(--bg) 70%,transparent);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;}
-.brand-name{font-size:22px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#f5a623,#f7c97e,#f5a623);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.brand-sub{font-size:9px;color:var(--muted);letter-spacing:.5px;margin-top:3px;}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;background:var(--surface2);border:1px solid transparent;transition:.3s;margin-top:4px;}
-.status-badge.on{background:var(--amber-glow);border-color:rgba(245,166,35,.2);}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:.3s;}
-.status-badge.on .dot{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.status-text{font-size:9px;color:var(--muted);letter-spacing:.8px;font-family:monospace;}
-.status-badge.on .status-text{color:var(--amber);}
-.power-btn{width:56px;height:56px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.3s;-webkit-user-select:none;user-select:none;}
-.power-btn.on{border-color:var(--amber);box-shadow:0 0 0 4px var(--amber-glow),0 0 25px var(--amber-glow2);}
-.power-btn svg{width:26px;height:26px;transition:.3s;}
-.power-btn:active{transform:scale(.9);}
-.content{padding:0 16px;}
-.section-hdr{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:20px 2px 10px;display:flex;align-items:center;gap:8px;}
-.section-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
-.preview-card{background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border);}
-.preview-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.preview-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-.preview-badge{font-size:8px;font-family:monospace;color:var(--amber);background:var(--amber-glow);padding:2px 8px;border-radius:4px;}
-.preview-screen{width:100%;height:110px;border-radius:var(--radius-xs);background:linear-gradient(135deg,#0d0d2b,#141438,#0a1a3d);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.preview-tint{position:absolute;inset:0;transition:background .5s;border-radius:var(--radius-xs);}
-.preview-info{position:relative;z-index:1;text-align:center;}
-.preview-clock{font-family:monospace;font-size:32px;font-weight:300;color:#fff;letter-spacing:2px;text-shadow:0 0 20px rgba(255,255,255,.3);}
-.preview-date{font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
-.stat-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;border:1px solid var(--border);}
-.stat-val{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--amber),var(--amber2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:monospace;}
-.stat-label{font-size:8px;color:var(--muted);margin-top:4px;letter-spacing:.5px;}
-.presets-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.preset{background:var(--surface);border-radius:var(--radius-sm);padding:12px 6px 10px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.2s;-webkit-user-select:none;user-select:none;}
-.preset.active{border-color:var(--amber);background:var(--amber-glow);}
-.preset:active{transform:scale(.9);}
-.p-emoji{font-size:22px;display:block;margin-bottom:4px;}
-.p-name{font-size:9px;font-weight:600;color:var(--muted);}
-.preset.active .p-name{color:var(--amber);}
-.p-k{font-family:monospace;font-size:7px;color:var(--muted);opacity:.5;margin-top:2px;}
-.slider-card{background:var(--surface);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border);margin-bottom:8px;}
-.slider-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.slider-lw{display:flex;align-items:center;gap:8px;}
-.slider-emoji{font-size:18px;}
-.slider-name{font-size:13px;font-weight:500;}
-.slider-val{font-family:monospace;font-size:11px;color:var(--amber);background:var(--amber-glow);padding:3px 10px;border-radius:8px;min-width:52px;text-align:center;border:1px solid rgba(245,166,35,.15);}
-input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;outline:none;cursor:pointer;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--amber);box-shadow:0 2px 8px rgba(245,166,35,.5);cursor:pointer;transition:.15s;}
-input[type=range]:active::-webkit-slider-thumb{transform:scale(1.3);box-shadow:0 0 0 8px var(--amber-glow);}
-#r-temp{background:linear-gradient(90deg,#ff2200,#ff8800,#ffcc88,#fff0d0,#aabbff);}
-#r-intensity{background:linear-gradient(90deg,var(--surface3),var(--amber));}
-#r-dim{background:linear-gradient(90deg,var(--surface3),#111);}
-.temp-hint{display:flex;justify-content:space-between;margin-top:6px;}
-.temp-hint span{font-size:9px;color:var(--muted);}
-.schedule-card{background:var(--surface);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-user-select:none;user-select:none;transition:.2s;}
-.schedule-card:active{transform:scale(.98);}
-.sched-icon{font-size:26px;}
-.sched-info{flex:1;}
-.sched-title{font-size:13px;font-weight:600;}
-.sched-sub{font-size:10px;color:var(--muted);margin-top:2px;font-family:monospace;}
-.toggle{width:46px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:.3s;flex-shrink:0;border:1px solid var(--border);}
-.toggle.on{background:var(--amber);}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
-.toggle.on::after{left:23px;}
-.tips-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--border);}
-.tip-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
-.tip-row:last-child{border-bottom:none;padding-bottom:0;}
-.tip-row:first-child{padding-top:0;}
-.tip-icon{font-size:18px;flex-shrink:0;}
-.tip-title{font-size:12px;font-weight:600;margin-bottom:2px;}
-.tip-text{font-size:11px;color:var(--muted);line-height:1.5;}
-.footer{text-align:center;padding:24px 16px 0;font-size:10px;color:var(--muted);opacity:.35;line-height:1.8;}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+html { height: 100%; }
+body {
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   FILTER OVERLAYS (the actual filter drawn over everything)
+   ============================================================ */
+#overlay-filter {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9998;
+  opacity: 0;
+  background: rgba(255,80,0,0);
+  transition: background 0.6s ease, opacity 0.6s ease;
+  will-change: opacity, background;
+}
+#overlay-dim {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9997;
+  background: #000; opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* ============================================================
+   ONBOARDING SCREEN
+   ============================================================ */
+#onboarding {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+#onboarding.hidden { display: none; }
+.ob-moon { font-size: 72px; margin-bottom: 24px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.ob-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px;
+  background: linear-gradient(135deg, var(--amber), var(--amber-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 12px; }
+.ob-sub { font-size: 15px; color: var(--text2); line-height: 1.6; margin-bottom: 40px; }
+.ob-facts { width: 100%; margin-bottom: 40px; }
+.ob-fact { display: flex; align-items: center; gap: 12px;
+  background: var(--surface2); border-radius: var(--r-sm);
+  padding: 14px 16px; margin-bottom: 10px; text-align: left; }
+.ob-fact-icon { font-size: 22px; flex-shrink: 0; }
+.ob-fact-text { font-size: 13px; color: var(--text2); line-height: 1.4; }
+.ob-fact-text strong { color: var(--text); }
+.ob-btn { width: 100%; padding: 18px;
+  background: linear-gradient(135deg, var(--amber), var(--amber-dk));
+  border: none; border-radius: var(--r-sm); color: #000;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245,166,35,0.35);
+  transition: var(--trans); }
+.ob-btn:active { transform: scale(0.97); }
+
+/* ============================================================
+   INSTALL BANNER
+   ============================================================ */
+#install-banner {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  z-index: 500;
+  transform: translateY(100%);
+  transition: transform 0.4s ease;
+}
+#install-banner.show { transform: translateY(0); }
+.install-icon { font-size: 28px; flex-shrink: 0; }
+.install-info { flex: 1; }
+.install-title { font-size: 13px; font-weight: 600; }
+.install-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.install-btn { padding: 8px 16px; background: var(--amber);
+  border: none; border-radius: 8px; color: #000;
+  font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+.install-close { padding: 4px 8px; background: none; border: none;
+  color: var(--muted); font-size: 18px; cursor: pointer; }
+
+/* ============================================================
+   UPDATE BANNER
+   ============================================================ */
+#update-banner {
+  background: rgba(34,201,122,0.1);
+  border-bottom: 1px solid rgba(34,201,122,0.2);
+  padding: 10px 20px;
+  display: none; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--green);
+}
+#update-banner.show { display: flex; }
+#update-banner button { margin-left: auto; padding: 4px 12px;
+  background: var(--green); border: none; border-radius: 6px;
+  color: #000; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar {
+  padding: 52px 20px 14px;
+  background: linear-gradient(180deg, var(--bg) 75%, transparent);
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.brand-name {
+  font-size: 22px; font-weight: 800; letter-spacing: -.5px;
+  background: linear-gradient(135deg, var(--amber) 0%, var(--amber-lt) 60%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand-tag { font-size: 9px; color: var(--muted); letter-spacing: .8px;
+  text-transform: uppercase; margin-top: 2px; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  background: var(--surface2); border: 1px solid transparent;
+  margin-top: 6px; transition: var(--trans);
+}
+.status-pill.on { background: var(--glow); border-color: rgba(245,166,35,.25); }
+.s-dot { width: 6px; height: 6px; border-radius: 50%;
+  background: var(--muted); transition: var(--trans); flex-shrink: 0; }
+.status-pill.on .s-dot { background: var(--amber);
+  box-shadow: 0 0 6px var(--amber); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+.s-text { font-size: 9px; color: var(--muted);
+  letter-spacing: .8px; font-family: monospace; }
+.status-pill.on .s-text { color: var(--amber); }
+
+/* Power button */
+.power-wrap { position: relative; }
+.power-ring-outer {
+  position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid transparent; transition: var(--trans);
+  animation: none;
+}
+.power-btn.on ~ .power-ring-outer, .power-btn.on + .power-ring-outer {
+  border-color: rgba(245,166,35,.3);
+  animation: spin-ring 3s linear infinite;
+}
+@keyframes spin-ring {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.power-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--surface2); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--trans); position: relative;
+  -webkit-user-select: none; user-select: none;
+}
+.power-btn.on {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--glow), 0 0 28px var(--glow2);
+}
+.power-btn svg { width: 26px; height: 26px; transition: var(--trans); }
+.power-btn:active { transform: scale(0.88); }
+
+/* ============================================================
+   CONTENT WRAPPER
+   ============================================================ */
+.app { padding-bottom: 60px; }
+.content { padding: 0 16px; }
+
+/* Section header */
+.sh {
+  font-size: 9px; color: var(--muted);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin: 22px 2px 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sh::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ============================================================
+   PREVIEW CARD
+   ============================================================ */
+.preview-card {
+  background: var(--surface); border-radius: var(--r);
+  padding: 14px; border: 1px solid var(--border);
+}
+.preview-head {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 10px;
+}
+.preview-lbl { font-size: 9px; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase; }
+.preview-chip {
+  font-size: 8px; font-family: monospace; color: var(--amber);
+  background: var(--glow); padding: 2px 8px; border-radius: 5px;
+  border: 1px solid rgba(245,166,35,.12);
+}
+.preview-screen {
+  width: 100%; height: 115px; border-radius: var(--r-xs);
+  background: linear-gradient(135deg, #0c0c2a, #141438, #0a1a3d);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Simulated stars */
+.preview-screen::before {
+  content: '· · ✦ · · · ✦ · · ✦ · · · ✦ · ·';
+  position: absolute; top: 8px; left: 0; right: 0;
+  text-align: center; font-size: 9px;
+  color: rgba(255,255,255,.2); letter-spacing: 3px;
+}
+.preview-tint {
+  position: absolute; inset: 0;
+  transition: background 0.5s ease, opacity 0.5s ease;
+}
+.preview-content { position: relative; z-index: 1; text-align: center; }
+.preview-time {
+  font-family: monospace; font-size: 34px; font-weight: 200;
+  color: #fff; letter-spacing: 3px;
+  text-shadow: 0 0 20px rgba(255,255,255,.25);
+}
+.preview-date { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 4px; }
+
+/* ============================================================
+   STATS ROW
+   ============================================================ */
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.stat {
+  background: var(--surface); border-radius: var(--r-sm);
+  padding: 14px 8px; text-align: center;
+  border: 1px solid var(--border);
+}
+.stat-val {
+  font-size: 19px; font-weight: 700;
+  background: linear-gradient(135deg, var(--amber), var(--amber-lt));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; font-family: monospace; line-height: 1;
+}
+.stat-lbl { font-size: 8px; color: var(--muted);
+  margin-top: 5px; letter-spacing: .5px; text-transform: uppercase; }
+
+/* ============================================================
+   PRESETS
+   ============================================================ */
+.presets { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.preset {
+  background: var(--surface); border-radius: var(--r-sm);
+  padding: 12px 4px 10px; text-align: center;
+  cursor: pointer; border: 2px solid transparent;
+  transition: var(--trans); position: relative; overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+}
+.preset::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0, var(--glow) 0%, transparent 70%);
+  opacity: 0; transition: var(--trans);
+}
+.preset.active { border-color: var(--amber); }
+.preset.active::after { opacity: 1; }
+.preset:active { transform: scale(0.88); }
+.p-icon { font-size: 22px; display: block; margin-bottom: 4px; line-height: 1; }
+.p-name { font-size: 9px; font-weight: 600; color: var(--muted);
+  transition: color var(--trans); }
+.preset.active .p-name { color: var(--amber); }
+.p-k { font-family: monospace; font-size: 7px; color: var(--muted);
+  opacity: .45; margin-top: 2px; }
+.preset.active .p-k { opacity: .85; color: var(--amber-lt); }
+
+/* ============================================================
+   SLIDER CARDS
+   ============================================================ */
+.slider-card {
+  background: var(--surface); border-radius: var(--r-sm);
+  padding: 16px; border: 1px solid var(--border); margin-bottom: 8px;
+}
+.slider-head {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.slider-lbl { display: flex; align-items: center; gap: 8px; }
+.slider-icon { font-size: 17px; }
+.slider-name { font-size: 13px; font-weight: 500; }
+.slider-val {
+  font-family: monospace; font-size: 11px; color: var(--amber);
+  background: var(--glow); padding: 3px 10px; border-radius: 8px;
+  min-width: 54px; text-align: center;
+  border: 1px solid rgba(245,166,35,.14);
+}
+/* Range */
+input[type=range] {
+  -webkit-appearance: none; width: 100%;
+  height: 5px; border-radius: 5px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 2px 10px rgba(245,166,35,.55);
+  cursor: pointer; transition: transform .15s;
+  border: 3px solid rgba(255,255,255,.15);
+}
+input[type=range]:active::-webkit-slider-thumb {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 8px var(--glow), 0 2px 14px rgba(245,166,35,.6);
+}
+#r-temp {
+  background: linear-gradient(90deg,
+    #ff1a00 0%, #ff6600 12%, #ff9933 26%,
+    #ffcc77 45%, #fff0cc 65%, #cce4ff 82%, #99aaff 100%);
+}
+#r-intensity { background: linear-gradient(90deg, var(--surface3), var(--amber)); }
+#r-dim       { background: linear-gradient(90deg, var(--surface3), #080808); }
+
+.temp-hint {
+  display: flex; justify-content: space-between; margin-top: 7px;
+}
+.temp-hint span { font-size: 9px; color: var(--muted); }
+
+/* ============================================================
+   SCHEDULE CARD
+   ============================================================ */
+.schedule-card {
+  background: var(--surface); border-radius: var(--r-sm);
+  padding: 16px; border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: var(--trans);
+  -webkit-user-select: none; user-select: none;
+}
+.schedule-card:active { transform: scale(0.98); }
+.sched-icon { font-size: 26px; flex-shrink: 0; }
+.sched-body { flex: 1; }
+.sched-title { font-size: 13px; font-weight: 600; }
+.sched-sub { font-size: 10px; color: var(--muted);
+  margin-top: 3px; font-family: monospace; }
+.sched-next { font-size: 9px; color: var(--amber);
+  margin-top: 4px; display: none; }
+.sched-next.show { display: block; }
+
+/* Toggle */
+.toggle {
+  width: 46px; height: 26px; border-radius: 13px;
+  background: var(--surface3); position: relative;
+  transition: var(--trans); flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.toggle.on { background: var(--amber); border-color: var(--amber); }
+.toggle::after {
+  content: ''; position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; transition: var(--trans);
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.toggle.on::after { left: 23px; }
+
+/* ============================================================
+   NOTIFICATION PERMISSION CARD
+   ============================================================ */
+.notif-card {
+  background: var(--surface); border-radius: var(--r-sm);
+  padding: 14px 16px; border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 8px;
+}
+.notif-card.hidden { display: none; }
+.notif-icon { font-size: 22px; flex-shrink: 0; }
+.notif-body { flex: 1; }
+.notif-title { font-size: 12px; font-weight: 600; }
+.notif-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.notif-btn { padding: 7px 14px;
+  background: linear-gradient(135deg, var(--amber), var(--amber-dk));
+  border: none; border-radius: 8px; color: #000;
+  font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+
+/* ============================================================
+   USAGE LOG
+   ============================================================ */
+.log-card {
+  background: var(--surface); border-radius: var(--r-sm);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.log-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.log-row:last-child { border-bottom: none; }
+.log-date { font-size: 10px; color: var(--muted); font-family: monospace; min-width: 36px; }
+.log-bar-wrap { flex: 1; height: 5px; background: var(--surface3); border-radius: 5px; overflow: hidden; }
+.log-bar { height: 100%; background: linear-gradient(90deg, var(--amber), var(--amber-lt)); border-radius: 5px; }
+.log-dur { font-size: 10px; color: var(--amber); font-family: monospace; min-width: 32px; text-align: right; }
+.log-empty { padding: 20px; text-align: center; font-size: 12px; color: var(--muted); }
+
+/* ============================================================
+   TIPS / INFO CARDS
+   ============================================================ */
+.tips-card {
+  background: var(--surface); border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.tip {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+}
+.tip:last-child { border-bottom: none; }
+.tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.tip-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.tip-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+  text-align: center; padding: 28px 16px 0;
+  font-size: 10px; color: var(--muted); opacity: .35; line-height: 1.9;
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+#toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); padding: 10px 20px; border-radius: 20px;
+  font-size: 12px; white-space: nowrap;
+  opacity: 0; transition: all .3s; z-index: 999; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-<div id="filter-overlay"></div>
-<div id="dim-overlay"></div>
-<div class="app">
 
-<div class="topbar">
-  <div>
-    <div class="brand-name">Blue Light Filter</div>
-    <div class="brand-sub">NIGHT MODE &amp; EYE CARE</div>
-    <div class="status-badge" id="status-badge">
-      <span class="dot"></span>
-      <span class="status-text" id="status-text">FILTER OFF</span>
+<!-- Real filter overlays -->
+<div id="overlay-filter"></div>
+<div id="overlay-dim"></div>
+
+<!-- ============================================================
+     ONBOARDING (shows once on first launch)
+     ============================================================ -->
+<div id="onboarding" class="hidden">
+  <div class="ob-moon">🌙</div>
+  <div class="ob-title">Blue Light Filter</div>
+  <div class="ob-sub">Your screen emits blue light that disrupts sleep.<br>This app adds a warm amber filter to protect you.</div>
+  <div class="ob-facts">
+    <div class="ob-fact">
+      <span class="ob-fact-icon">😴</span>
+      <div class="ob-fact-text"><strong>Sleep 90 mins sooner</strong> — Blue light delays melatonin. Amber fixes it.</div>
+    </div>
+    <div class="ob-fact">
+      <span class="ob-fact-icon">👁️</span>
+      <div class="ob-fact-text"><strong>Stop eye strain</strong> — Warm light is far gentler during night use.</div>
+    </div>
+    <div class="ob-fact">
+      <span class="ob-fact-icon">🔋</span>
+      <div class="ob-fact-text"><strong>Save battery</strong> — Dimmer warm screen uses less power.</div>
     </div>
   </div>
-  <div class="power-btn" id="power-btn" onclick="toggleFilter()">
-    <svg viewBox="0 0 24 24" fill="none" id="power-svg" stroke="#6b697e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/>
-      <line x1="12" y1="2" x2="12" y2="12"/>
-    </svg>
-  </div>
+  <button class="ob-btn" onclick="finishOnboarding()">Get Started — It's Free</button>
 </div>
 
-<div class="content">
-
-<div class="preview-card">
-  <div class="preview-label-row">
-    <span class="preview-label">Screen Preview</span>
-    <span class="preview-badge" id="preview-badge">1800K · 70%</span>
-  </div>
-  <div class="preview-screen">
-    <div class="preview-tint" id="preview-tint"></div>
-    <div class="preview-info">
-      <div class="preview-clock" id="clock">--:--</div>
-      <div class="preview-date" id="pdate">Blue Light Filter</div>
-    </div>
-  </div>
-</div>
-
-<div class="section-hdr">Today's Protection</div>
-<div class="stats-row">
-  <div class="stat-card"><div class="stat-val" id="stat-hours">0.0h</div><div class="stat-label">ACTIVE</div></div>
-  <div class="stat-card"><div class="stat-val" id="stat-temp">1800K</div><div class="stat-label">WARMTH</div></div>
-  <div class="stat-card"><div class="stat-val" id="stat-protect">72%</div><div class="stat-label">BLOCKED</div></div>
-</div>
-
-<div class="section-hdr">Light Mode Presets</div>
-<div class="presets-grid" id="presets-grid"></div>
-
-<div class="section-hdr">Fine Tuning</div>
-
-<div class="slider-card">
-  <div class="slider-top">
-    <div class="slider-lw"><span class="slider-emoji">🌡️</span><span class="slider-name">Color Temperature</span></div>
-    <span class="slider-val" id="v-temp">1800K</span>
-  </div>
-  <input type="range" id="r-temp" min="1000" max="9300" value="1800" step="100">
-  <div class="temp-hint"><span>🔥 Warm 1000K</span><span>9300K Cool ❄️</span></div>
-</div>
-
-<div class="slider-card">
-  <div class="slider-top">
-    <div class="slider-lw"><span class="slider-emoji">🔆</span><span class="slider-name">Filter Intensity</span></div>
-    <span class="slider-val" id="v-intensity">70%</span>
-  </div>
-  <input type="range" id="r-intensity" min="0" max="100" value="70" step="1">
-</div>
-
-<div class="slider-card">
-  <div class="slider-top">
-    <div class="slider-lw"><span class="slider-emoji">🌑</span><span class="slider-name">Screen Dimmer</span></div>
-    <span class="slider-val" id="v-dim">0%</span>
-  </div>
-  <input type="range" id="r-dim" min="0" max="80" value="0" step="1">
-</div>
-
-<div class="section-hdr">Auto Schedule</div>
-<div class="schedule-card" onclick="toggleSchedule()">
-  <div class="sched-icon">🌙</div>
-  <div class="sched-info">
-    <div class="sched-title">Sunset to Sunrise</div>
-    <div class="sched-sub">AUTO ON: 20:00 → OFF: 06:30</div>
-  </div>
-  <div class="toggle" id="sched-toggle"></div>
-</div>
-
-<div class="section-hdr">Why Use Blue Light Filter</div>
-<div class="tips-card">
-  <div class="tip-row"><span class="tip-icon">😴</span><div><div class="tip-title">Better Sleep</div><div class="tip-text">Blue light delays melatonin by up to 90 mins. Amber filter restores your natural sleep cycle.</div></div></div>
-  <div class="tip-row"><span class="tip-icon">👁️</span><div><div class="tip-title">Less Eye Strain</div><div class="tip-text">Warm light reduces digital eye fatigue during long night browsing sessions.</div></div></div>
-  <div class="tip-row"><span class="tip-icon">🧠</span><div><div class="tip-title">Protects Circadian Rhythm</div><div class="tip-text">Screens trick your brain into thinking it's daytime. This filter fixes that naturally.</div></div></div>
-  <div class="tip-row"><span class="tip-icon">🔋</span><div><div class="tip-title">Saves Battery</div><div class="tip-text">Dimmer warm tones use less power especially on AMOLED screens.</div></div></div>
-</div>
-
-<div class="footer">Blue Light Filter – Night Mode · v2.0<br>Protecting your eyes every night 🌙</div>
-</div></div>
-
-<script>
-const PRESETS=[
-  {icon:'🔥',name:'Ember',k:1200,r:255,g:35,b:0,i:88},
-  {icon:'🕯️',name:'Candle',k:1800,r:255,g:80,b:0,i:72},
-  {icon:'💡',name:'Warm',k:2700,r:255,g:120,b:20,i:55},
-  {icon:'🌅',name:'Sunset',k:3200,r:255,g:155,b:60,i:42},
-  {icon:'🌙',name:'Moon',k:4000,r:255,g:190,b:100,i:32},
-  {icon:'🌤️',name:'Day',k:5000,r:255,g:220,b:150,i:20},
-  {icon:'❄️',name:'Cool',k:6500,r:200,g:210,b:255,i:12},
-  {icon:'🔵',name:'Screen',k:9300,r:150,g:180,b:255,i:8},
-];
-let S={on:false,temp:1800,intensity:70,dim:0,scheduleOn:false,activePreset:1,sessionStart:null};
-function load(){try{Object.assign(S,JSON.parse(localStorage.getItem('blf2')||'{}'));}catch(e){}}
-function save(){try{localStorage.setItem('blf2',JSON.stringify(S));}catch(e){}}
-function tempToRGB(k){
-  if(k<2000)return[255,Math.round((k-1000)/1000*60),0];
-  if(k<3000)return[255,Math.round(60+(k-2000)/1000*80),0];
-  if(k<4000)return[255,Math.round(140+(k-3000)/1000*60),Math.round((k-3000)/1000*40)];
-  if(k<5500)return[255,Math.round(200+(k-4000)/1500*30),Math.round(40+(k-4000)/1500*80)];
-  if(k<6500)return[Math.round(255-(k-5500)/1000*30),230,Math.round(120+(k-5500)/1000*80)];
-  return[Math.round(225-(k-6500)/2800*60),Math.round(230-(k-6500)/2800*40),255];
-}
-function blueBlocked(k,i){return Math.round(Math.max(0,Math.min(1,(9300-k)/8300))*i*0.85);}
-function applyFilter(){
-  const ov=document.getElementById('filter-overlay');
-  const dv=document.getElementById('dim-overlay');
-  const tint=document.getElementById('preview-tint');
-  document.getElementById('preview-badge').textContent=S.temp+'K · '+S.intensity+'%';
-  document.getElementById('stat-temp').textContent=S.temp+'K';
-  document.getElementById('stat-protect').textContent=blueBlocked(S.temp,S.intensity)+'%';
-  if(!S.on){ov.style.opacity=0;dv.style.opacity=0;tint.style.background='transparent';return;}
-  const[r,g,b]=tempToRGB(S.temp);
-  const alpha=(S.intensity/100)*0.75;
-  const color=`rgba(${r},${g},${b},${alpha})`;
-  ov.style.background=color;ov.style.opacity=1;
-  tint.style.background=color;
-  dv.style.opacity=(S.dim/100)*0.82;
-}
-function toggleFilter(){
-  S.on=!S.on;
-  if(S.on&&!S.sessionStart)S.sessionStart=Date.now();
-  if(!S.on)S.sessionStart=null;
-  save();updatePowerUI();applyFilter();
-  if(navigator.vibrate)navigator.vibrate(S.on?[40]:[15,10,15]);
-}
-function updatePowerUI(){
-  const btn=document.getElementById('power-btn');
-  const svg=document.getElementById('power-svg');
-  const badge=document.getElementById('status-badge');
-  const text=document.getElementById('status-text');
-  if(S.on){btn.classList.add('on');badge.classList.add('on');svg.setAttribute('stroke','#f5a623');text.textContent='FILTER ACTIVE';}
-  else{btn.classList.remove('on');badge.classList.remove('on');svg.setAttribute('stroke','#6b697e');text.textContent='FILTER OFF';}
-}
-function buildPresets(){
-  document.getElementById('presets-grid').innerHTML=PRESETS.map((p,i)=>
-    `<div class="preset ${i===S.activePreset?'active':''}" onclick="selectPreset(${i})">
-      <span class="p-emoji">${p.icon}</span>
-      <div class="p-name">${p.name}</div>
-      <div class="p-k">${p.k}K</div>
-    </div>`).join('');
-}
-function selectPreset(i){
-  const p=PRESETS[i];S.activePreset=i;S.temp=p.k;S.intensity=p.i;
-  document.getElementById('r-temp').value=p.k;
-  document.getElementById('r-intensity').value=p.i;
-  document.getElementById('v-temp').textContent=p.k+'K';
-  document.getElementById('v-intensity').textContent=p.i+'%';
-  buildPresets();
-  if(!S.on){S.on=true;updatePowerUI();}
-  applyFilter();save();
-  if(navigator.vibrate)navigator.vibrate(20);
-}
-document.getElementById('r-temp').oninput=function(){
-  S.temp=parseInt(this.value);
-  document.getElementById('v-temp').textContent=this.value+'K';
-  if(!S.on){S.on=true;updatePowerUI();}
-  applyFilter();save();
-};
-document.getElementById('r-intensity').oninput=function(){
-  S.intensity=parseInt(this.value);
-  document.getElementById('v-intensity').textContent=this.value+'%';
-  applyFilter();save();
-};
-document.getElementById('r-dim').oninput=function(){
-  S.dim=parseInt(this.value);
-  document.getElementById('v-dim').textContent=this.value+'%';
-  applyFilter();save();
-};
-function toggleSchedule(){
-  S.scheduleOn=!S.scheduleOn;
-  document.getElementById('sched-toggle').classList.toggle('on',S.scheduleOn);
-  save();if(navigator.vibrate)navigator.vibrate(15);
-}
-function checkSchedule(){
-  if(!S.scheduleOn)return;
-  const now=new Date();const mins=now.getHours()*60+now.getMinutes();
-  const shouldBeOn=mins>=1200||mins<390;
-  if(shouldBeOn!==S.on){S.on=shouldBeOn;updatePowerUI();applyFilter();save();}
-}
-function updateClock(){
-  const now=new Date();
-  document.getElementById('clock').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('pdate').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  if(S.on&&S.sessionStart){
-    const mins=Math.floor((Date.now()-S.sessionStart)/60000);
-    document.getElementById('stat-hours').textContent=(mins/60).toFixed(1)+'h';
-  }
-}
-function init(){
-  load();
-  document.getElementById('r-temp').value=S.temp;
-  document.getElementById('r-intensity').value=S.intensity;
-  document.getElementById('r-dim').value=S.dim;
-  document.getElementById('v-temp').textContent=S.temp+'K';
-  document.getElementById('v-intensity').textContent=S.intensity+'%';
-  document.getElementById('v-dim').textContent=S.dim+'%';
-  document.getElementById('sched-toggle').classList.toggle('on',S.scheduleOn);
-  buildPresets();updatePowerUI();applyFilter();updateClock();
-  setInterval(updateClock,1000);setInterval(checkSchedule,60000);
-}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-init();
-</script>
-</body>
-</html>
+<!-- Update banner -->
+<div id="update-banner">
+  <span>🔄 New version available!</span>
+  <button onclick="reloadApp()">Up
