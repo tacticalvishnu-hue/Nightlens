@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.nightlens.app",
+    "sha256_cert_fingerprints": ["61:42:08:08:2B:8F:B2:37:20:7D:59:93:7F:04:A4:2B:7A:D7:AE:E5:C2:2E:DC:8E:4F:7D:0E:20:B6:BF:86:C9"]
+  }
+}]
