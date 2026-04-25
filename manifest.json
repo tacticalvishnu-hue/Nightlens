@@ -2,7 +2,7 @@
   "id": "/Nightlens/",
   "name": "Blue Light Filter - Night Mode",
   "short_name": "Night Filter",
-  "description": "Protect your eyes with a warm amber blue light filter. Reduce eye strain, sleep better and block harmful blue light wavelengths with 8 scientifically tuned presets.",
+  "description": "Protect your eyes with a warm amber blue light filter. Reduce eye strain, sleep better and block harmful blue light wavelengths with 8 scientifically tuned presets. Features auto schedule, usage tracking and real-time preview.",
   "start_url": "/Nightlens/index.html",
   "scope": "/Nightlens/",
   "display": "standalone",
@@ -24,21 +24,21 @@
   },
   "shortcuts": [
     {
-      "name": "Candle Mode (1800K)",
+      "name": "Candle Mode",
       "short_name": "Candle",
       "description": "Activate warm 1800K candle filter",
       "url": "/Nightlens/index.html"
     },
     {
-      "name": "Ember Mode (1200K)",
+      "name": "Ember Mode",
       "short_name": "Ember",
       "description": "Activate deep red 1200K filter",
       "url": "/Nightlens/index.html"
     },
     {
-      "name": "Moon Mode (4000K)",
+      "name": "Moon Mode",
       "short_name": "Moon",
-      "description": "Activate moonlight filter",
+      "description": "Activate gentle moonlight filter",
       "url": "/Nightlens/index.html"
     }
   ],
@@ -48,7 +48,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Blue Light Filter home screen with preset modes"
+      "label": "Blue Light Filter home screen"
     }
   ],
   "icons": [
